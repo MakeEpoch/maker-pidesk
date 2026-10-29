@@ -48,7 +48,7 @@ cd plugin/pidesk-sync
 npm_config_cache=$(mktemp -d) npm pack --pack-destination ../../dist
 
 # 2. 装进 profile（替换旧条目，不要在 package.json 里手写 link:）
-dsh plugin --profile web add "$(pwd)/../../dist/dsh-pidesk-sync-0.1.0.tgz" \
+dsh plugin --profile web add "$(pwd)/../../dist/dsh-pidesk-sync-0.1.1.tgz" \
   --offline --ignore-scripts
 
 # 3. 重启 DSH Web 进程后生效

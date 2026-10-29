@@ -1,6 +1,6 @@
 {
   "name": "@dsh/pidesk-sync",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DSH 会话任务看板：聚合 DSH/Codex 任务进度，推送到 pidesk 信息屏",
   "type": "module",
   "main": "./host/index.js",
