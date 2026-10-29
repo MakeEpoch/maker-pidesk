@@ -92,11 +92,14 @@ node tools/bark-test.mjs --key <你的BarkKey>
 
 ```sh
 cd plugin/pidesk-sync
+DSH_HOME="${DSH_HOME:-$HOME/.dsh}"
 # 打包（需要可写 npm 缓存，环境默认缓存只读时用 npm_config_cache 指到临时目录）
 npm_config_cache=$(mktemp -d) npm pack --pack-destination ../../dist
 
 # 装进 profile，替换旧条目；不要在 profile 的 package.json 里手写 link:
-dsh plugin --profile web add "$(pwd)/../../dist/dsh-pidesk-sync-0.1.0.tgz" \
+mkdir -p "$DSH_HOME/profiles/web/.plugin-manager/packages"
+cp ../../dist/dsh-pidesk-sync-0.1.0.tgz "$DSH_HOME/profiles/web/.plugin-manager/packages/"
+dsh plugin --profile web add "$DSH_HOME/profiles/web/.plugin-manager/packages/dsh-pidesk-sync-0.1.0.tgz" \
   --offline --ignore-scripts
 # 重启 DSH Web 进程后生效
 ```
