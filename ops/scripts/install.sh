@@ -3,7 +3,18 @@
 set -euo pipefail
 root=$(cd "$(dirname "$0")/../.." && pwd)
 [[ $(uname -s) == Linux && $EUID == 0 ]] || { echo 'Run as root on Raspberry Pi OS.' >&2; exit 1; }
-id pi >/dev/null
+runtime_user=$(python3 - "$root" <<'PYCODE'
+import json, os, sys
+path = "/etc/pidesk-dashboard.json"
+if not os.path.isfile(path): path = os.path.join(sys.argv[1], "app/config/pidesk.example.json")
+with open(path, encoding="utf-8") as f: value = json.load(f).get("runtime_user", "pi")
+if not isinstance(value, str) or not value or value.startswith("-"):
+    raise SystemExit("Invalid runtime_user in configuration")
+print(value)
+PYCODE
+)
+id -- "$runtime_user" >/dev/null
+[[ $(id -u -- "$runtime_user") != 0 ]] || { echo 'runtime_user must not be root' >&2; exit 1; }
 python3 -c 'import PIL, numpy, websocket'
 command -v chromium-headless-shell >/dev/null
 command -v aplay >/dev/null

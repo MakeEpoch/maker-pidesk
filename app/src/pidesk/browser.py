@@ -17,14 +17,16 @@ from .framebuffer import canvas_size
 
 
 class Browser:
-    def __init__(self, url, angle=0):
+    def __init__(self, url, angle=0, run_as_user="pi"):
         self.process = None
         self.socket = None
         self.request_id = 0
         self.log = None
         profile = Path("/var/lib/pidesk-dashboard/html-browser")
         profile.mkdir(exist_ok=True)
-        account = pwd.getpwnam("pi")
+        account = pwd.getpwnam(run_as_user)
+        if account.pw_uid == 0:
+            raise ValueError("Chromium account must not be root")
         os.chown(profile, account.pw_uid, account.pw_gid)
         profile.chmod(0o700)
         active_port = profile / "DevToolsActivePort"
@@ -36,7 +38,7 @@ class Browser:
         command = [
             "runuser",
             "-u",
-            "pi",
+            run_as_user,
             "--",
             binary,
             "--no-sandbox",

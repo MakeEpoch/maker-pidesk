@@ -26,13 +26,23 @@ class Weather:
         self.config = config
         self.cache = Path(cache)
         saved = read_json(cache, {})
+        fallback = self.fallback()
+        if fallback.get("latitude") is None or fallback.get("longitude") is None:
+            fallback["source"] = "unconfigured"
         self.state = {
-            "location": saved.get("location", dict(config["fallback"], source="fallback")),
+            "location": saved.get("location", fallback),
             "weather": saved.get("weather"),
             "error": False,
         }
         self.lock = threading.Lock()
         self.location_checked = 0
+
+    def fallback(self):
+        location = {"city": "未配置地点", "latitude": None, "longitude": None}
+        configured = self.config.get("fallback")
+        if isinstance(configured, dict):
+            location.update(configured)
+        return dict(location, source="fallback")
 
     def snapshot(self):
         with self.lock:
@@ -42,7 +52,7 @@ class Weather:
         state = self.snapshot()
         now = time.time()
         if now - self.location_checked >= self.config["location_interval"]:
-            location = dict(self.config["fallback"], source="fallback")
+            location = self.fallback()
             if self.config["location_mode"] == "ip":
                 try:
                     geo = get_json(
@@ -50,7 +60,7 @@ class Weather:
                     )
                     if (
                         geo.get("success")
-                        and geo.get("country_code") == self.config["accepted_country"]
+                        and (not self.config.get("accepted_country") or geo.get("country_code") == self.config["accepted_country"])
                     ):
                         lat, lon = float(geo["latitude"]), float(geo["longitude"])
                         if not (-90 <= lat <= 90 and -180 <= lon <= 180):
@@ -70,6 +80,19 @@ class Weather:
             state["location"] = location
             self.location_checked = now
         location = state["location"]
+        lat, lon = location.get("latitude"), location.get("longitude")
+        try:
+            valid_location = (lat is not None and lon is not None and
+                              math.isfinite(float(lat)) and math.isfinite(float(lon)) and
+                              -90 <= float(lat) <= 90 and -180 <= float(lon) <= 180)
+        except (TypeError, ValueError):
+            valid_location = False
+        if not valid_location:
+            state.update(location={"city": "未配置地点", "latitude": None, "longitude": None, "source": "unconfigured"}, weather=None, error=False)
+            with self.lock:
+                self.state = state
+            atomic_json(self.cache, state)
+            return
         params = {
             "latitude": location["latitude"],
             "longitude": location["longitude"],

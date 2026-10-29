@@ -5,10 +5,10 @@ import json
 from pathlib import Path
 
 DEFAULT = {
-    "location_mode": "ip",
-    "accepted_country": "CN",
-    "fallback": {"city": "南京", "latitude": 32.0617, "longitude": 118.7778},
-    "timezone": "Asia/Shanghai",
+    "location_mode": "fixed",
+    "accepted_country": "",
+    "fallback": {"city": "未配置地点", "latitude": None, "longitude": None},
+    "timezone": "UTC",
     "weather_interval": 900,
     "location_interval": 21600,
     "agent_push_token": "",

@@ -1,17 +1,22 @@
 {
-  "location_mode": "ip",
-  "accepted_country": "CN",
+  "location_mode": "fixed",
+  "accepted_country": "",
   "fallback": {
-    "city": "南京",
-    "latitude": 32.0617,
-    "longitude": 118.7778
+    "city": "未配置地点",
+    "latitude": null,
+    "longitude": null
   },
-  "timezone": "Asia/Shanghai",
+  "timezone": "UTC",
   "weather_interval": 900,
   "location_interval": 21600,
   "agent_push_token": "",
   "html_animation": false,
   "html_frame_interval": 1.0,
   "html_rotation": 0,
-  "html_right_widget": "none"
+  "html_right_widget": "none",
+  "runtime_user": "pi",
+  "audio_device": "default",
+  "html_color_gain_r": 1.0,
+  "html_color_gain_g": 1.0,
+  "html_color_gain_b": 1.0
 }

@@ -73,7 +73,7 @@ class State:
         self.stats = {}
         self.stats_minute = None
         self.lock = threading.Lock()
-        self.audio = AudioPlayer()
+        self.audio = AudioPlayer(device=config.get("audio_device", "plughw:CARD=Headphones,DEV=0"), run_as_user=config.get("runtime_user", "pi"))
         self.cpu_sample = self.read_cpu()
         self.agents = AgentBoard(
             cache_dir=Path(cache_path).parent / "agents",
@@ -465,7 +465,7 @@ def main():
         Path("/run/pidesk-html").mkdir(exist_ok=True)
         started = time.monotonic()
         angle = state.rotation()
-        browser = Browser(f"http://127.0.0.1:{args.port}/?display=1", angle)
+        browser = Browser(f"http://127.0.0.1:{args.port}/?display=1", angle, run_as_user=config.get("runtime_user", "pi"))
         logging.info("HTML/browser ready in %.2fs", time.monotonic() - started)
         if args.probe:
             results, frames = [], []

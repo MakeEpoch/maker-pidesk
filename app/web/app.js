@@ -297,7 +297,7 @@ function renderScreen(payload) {
     }
     text('stale', payload.stale ? '缓存' : '');
   } else {
-    text('condition', payload.error ? '天气暂不可用' : '正在获取天气');
+    text('condition', payload.location.source === 'unconfigured' ? '请配置地点' : (payload.error ? '天气暂不可用' : '正在获取天气'));
     text('stale', '');
   }
   renderWidget(payload);
@@ -448,14 +448,14 @@ for (const [id, field] of GAIN_FIELDS) {
 }
 $('gain-reset').addEventListener('click', () => {
   $('gain-r').value = '1';
-  $('gain-g').value = '0.98';
-  $('gain-b').value = '0.97';
+  $('gain-g').value = '1.00';
+  $('gain-b').value = '1.00';
   text('gain-r-value', '1.00');
-  text('gain-g-value', '0.98');
-  text('gain-b-value', '0.97');
+  text('gain-g-value', '1.00');
+  text('gain-b-value', '1.00');
   change('color_gain_r', 1);
-  change('color_gain_g', 0.98);
-  change('color_gain_b', 0.97);
+  change('color_gain_g', 1);
+  change('color_gain_b', 1);
   text('gain-status', '已恢复默认');
 });
 // 照片上传

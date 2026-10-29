@@ -1,4 +1,4 @@
-"""Short stereo sound check through the Pi analog output."""
+"""Short stereo sound check through the configured ALSA output."""
 
 from io import BytesIO
 import math
@@ -66,13 +66,15 @@ class AudioPlayer:
         "none": ((), 0.0, 0.0),
     }
 
-    def __init__(self):
+    def __init__(self, device="plughw:CARD=Headphones,DEV=0", run_as_user="pi"):
+        self.device = device
+        self.run_as_user = run_as_user
         self.lock = threading.Lock()
 
     def play_wav(self, data, timeout=8):
-        command = ["/usr/bin/aplay", "-q", "-D", "plughw:CARD=Headphones,DEV=0"]
+        command = ["/usr/bin/aplay", "-q", "-D", self.device]
         if os.geteuid() == 0:
-            command = ["runuser", "-u", "pi", "--"] + command
+            command = ["runuser", "-u", self.run_as_user, "--"] + command
         subprocess.run(command, input=data, capture_output=True, check=True, timeout=timeout)
         return {"ok": True}
 

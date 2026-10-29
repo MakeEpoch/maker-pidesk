@@ -103,9 +103,33 @@ class SettingsTests(unittest.TestCase):
         controls = self.state.controls()
         self.assertEqual(controls["right_widget"], "photo")
 
+    def test_unconfigured_location_does_not_request_weather(self):
+        with tempfile.TemporaryDirectory() as directory:
+            weather = Weather(copy.deepcopy(DEFAULT), Path(directory) / "weather.json")
+            self.assertEqual(weather.snapshot()["location"]["source"], "unconfigured")
+            with patch("pidesk.weather.get_json") as request:
+                weather.refresh()
+                request.assert_not_called()
+            state = weather.snapshot()
+            self.assertEqual(state["location"]["source"], "unconfigured")
+            self.assertIsNone(state["weather"])
+
+    def test_ip_location_accepts_other_countries_when_unrestricted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config = copy.deepcopy(DEFAULT)
+            config.update(location_mode="ip", accepted_country="")
+            today = datetime.now(ZoneInfo(config["timezone"])).date()
+            response = {"current": {"temperature_2m": 21, "relative_humidity_2m": 70, "weather_code": 0, "time": today.isoformat()}, "daily": {"time": [today.isoformat()], "weather_code": [0], "temperature_2m_max": [24], "temperature_2m_min": [16], "precipitation_probability_max": [20]}}
+            weather = Weather(config, Path(directory) / "weather.json")
+            with patch("pidesk.weather.get_json", side_effect=[{"success": True, "country_code": "JP", "city": "Tokyo", "latitude": 35.68, "longitude": 139.69}, response]):
+                weather.refresh()
+            self.assertEqual(weather.snapshot()["location"]["city"], "Tokyo")
+            self.assertIsNotNone(weather.snapshot()["weather"])
+
     def test_foreign_location_falls_back_and_fetches_next_three_days(self):
         with tempfile.TemporaryDirectory() as directory:
             config = copy.deepcopy(DEFAULT)
+            config.update(location_mode="ip", accepted_country="CN", fallback={"city": "测试城市", "latitude": 32.0, "longitude": 118.0})
             today = datetime.now(ZoneInfo(config["timezone"])).date()
             response = {
                 "current": {
@@ -130,7 +154,7 @@ class SettingsTests(unittest.TestCase):
             ):
                 weather.refresh()
             state = weather.snapshot()
-            self.assertEqual(state["location"]["city"], "南京")
+            self.assertEqual(state["location"]["city"], "测试城市")
             self.assertEqual(len(state["weather"]["forecast"]), 3)
             self.assertEqual(
                 state["weather"]["forecast"][0]["date"], (today + timedelta(days=1)).isoformat()
@@ -150,6 +174,12 @@ class AudioTests(unittest.TestCase):
             )
             self.assertAlmostEqual(sound.getnframes() / 44100, 1.8, places=2)
             self.assertEqual(sound.readframes(1), bytes(4))
+
+    def test_configured_audio_device_and_runtime_user_are_arguments(self):
+        player = AudioPlayer(device="hw:Device,0", run_as_user="displayuser")
+        with patch("pidesk.audio.os.geteuid", return_value=0), patch("pidesk.audio.subprocess.run") as run:
+            player.play_wav(b"sample")
+        self.assertEqual(run.call_args.args[0], ["runuser", "-u", "displayuser", "--", "/usr/bin/aplay", "-q", "-D", "hw:Device,0"])
 
     def test_busy_playback_is_rejected(self):
         player = AudioPlayer()
