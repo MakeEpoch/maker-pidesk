@@ -31,7 +31,7 @@ Python 应用渲染网页并写 framebuffer；右侧「智能体任务」模块�
 
 ### DSH 插件
 
-DSH 同步插件独立维护在 [dsh-plugin-pidesk-sync](https://github.com/MakeEpoch/dsh-plugin-pidesk-sync)；请在该仓库打包安装和测试，不要链接源码到 profile。
+DSH 同步插件独立维护在 [dsh-mek-pidesk-sync](https://github.com/MakeEpoch/dsh-mek-pidesk-sync)；请在该仓库打包安装和测试，不要链接源码到 profile。
 
 ## 硬约束
 
@@ -78,7 +78,7 @@ DSH 同步插件独立维护在 [dsh-plugin-pidesk-sync](https://github.com/Make
 | [docs/hardware.md](docs/hardware.md) | 硬件、驱动、维护 |
 | [docs/ui.md](docs/ui.md) | 界面说明 |
 | [docs/verification.md](docs/verification.md) | 验证流程 |
-| [dsh-plugin-pidesk-sync](https://github.com/MakeEpoch/dsh-plugin-pidesk-sync) | 独立 DSH 宿主插件：聚合与推送、Bark 手机通知、配置项 |
+| [dsh-mek-pidesk-sync](https://github.com/MakeEpoch/dsh-mek-pidesk-sync) | 独立 DSH 宿主插件：聚合与推送、Bark 手机通知、配置项 |
 
 ## 已知问题
 

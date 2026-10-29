@@ -34,7 +34,7 @@ tests/              离线自动化测试
 docs/               开发、部署、硬件及接口说明
 ```
 
-DSH 宿主插件独立维护于 [dsh-plugin-pidesk-sync](https://github.com/MakeEpoch/dsh-plugin-pidesk-sync)，负责将 DSH / Codex 任务推送到信息屏。
+DSH 宿主插件独立维护于 [dsh-mek-pidesk-sync](https://github.com/MakeEpoch/dsh-mek-pidesk-sync)，负责将 DSH / Codex 任务推送到信息屏。
 
 `AGENTS.md` 是给协作者的约束与文档入口，改动前先读。
 
