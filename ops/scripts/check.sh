@@ -14,21 +14,11 @@ PY
 for path in ops/scripts/*.sh; do bash -n "$path"; done
 if command -v node >/dev/null; then
   shopt -s nullglob
-  js_files=(app/web/*.js plugin/*/host/*.js plugin/*/tools/*.js)
+  js_files=(app/web/*.js)
   shopt -u nullglob
   if [ ${#js_files[@]} -gt 0 ]; then
     for path in "${js_files[@]}"; do node --check "$path"; done
   fi
-  # 插件自带离线测试：需要 profile 的 node_modules 解析 peer 依赖，缺链接则跳过
-  for dir in plugin/*/; do
-    if [ -f "$dir/package.json" ] && [ -d "$dir/tests" ]; then
-      if [ -e "$dir/node_modules" ]; then
-        (cd "$dir" && npm test)
-      else
-        printf '%s 跳过测试（未链接 node_modules）\n' "$dir"
-      fi
-    fi
-  done
 else
   printf '%s\n' 'Node unavailable; JavaScript syntax check skipped.'
 fi

@@ -25,8 +25,6 @@ app/               树莓派应用（后端与前端同一次发布）
   src/pidesk/        Python 后端
   web/               前端 HTML/CSS/JS
   config/            示例配置
-plugin/pidesk-sync/  DSH 宿主插件：聚合 DSH/Codex 任务推送到本屏（独立 npm 包，
-                     不进入发布包）
 driver/kedei/       实机使用的内核驱动、overlay、维护工具（独立编译安装）
 ops/                安装、部署、打包与硬件检查
   scripts/           检查、打包、部署、安装脚本
@@ -35,6 +33,8 @@ ops/                安装、部署、打包与硬件检查
 tests/              离线自动化测试
 docs/               开发、部署、硬件及接口说明
 ```
+
+DSH 宿主插件独立维护于 [dsh-plugin-pidesk-sync](https://github.com/MakeEpoch/dsh-plugin-pidesk-sync)，负责将 DSH / Codex 任务推送到信息屏。
 
 `AGENTS.md` 是给协作者的约束与文档入口，改动前先读。
 
@@ -100,5 +100,5 @@ SPI 全屏更新较慢，页面使用静态内容及变化区域刷新；没有�
 
 ## 来源与许可证
 
-应用代码与自有插件采用 MIT；KeDei 驱动保留 GPL-2.0 声明与原始许可证，
+应用代码采用 MIT；KeDei 驱动保留 GPL-2.0 声明与原始许可证，
 见 [第三方说明](THIRD_PARTY_NOTICES.md)。

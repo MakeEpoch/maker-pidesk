@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "format": "prettier --write app/web plugin/*/host plugin/*/tools",
-    "format:check": "prettier --check app/web plugin/*/host plugin/*/tools"
+    "format": "prettier --write app/web",
+    "format:check": "prettier --check app/web"
   },
   "devDependencies": {
     "prettier": "3.9.10"

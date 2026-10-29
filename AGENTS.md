@@ -16,7 +16,6 @@ Python 应用渲染网页并写 framebuffer；右侧「智能体任务」模块�
 | 目录 | 是什么 | 交付方式 |
 |---|---|---|
 | `app/` | 树莓派应用：`src/pidesk/` 后端 + `web/` 前端 + `config/` 示例配置 | 同一次发布，`make deploy` |
-| `plugin/pidesk-sync/` | DSH 宿主插件 | 独立 npm 包，打包后安装，**不进发布包** |
 | `driver/kedei/` | 内核驱动、overlay、维护工具 | 独立编译安装，与 Python 无关 |
 | `ops/` | 安装、部署、打包、硬件检查脚本与 systemd 单元 | 只在开发机/部署时运行 |
 | `tests/` | 应用离线测试 | — |
@@ -30,36 +29,9 @@ Python 应用渲染网页并写 framebuffer；右侧「智能体任务」模块�
 - 新增可独立交付的单元就新建顶层目录，不要塞进 `ops/` 或 `app/`。
 - 运行时产物（`var/`、`dist/`）不入库。
 
-### 插件安装方式：打包安装，禁止软链源码
+### DSH 插件
 
-**必须**把插件打成 tgz 装进 DSH profile，**禁止**用 `link:` 方式把 profile
-指向本仓库的工作目录。
-
-**原因**：`link:` 会让 profile 的插件直接读工作树——源码改一行，运行中的插件
-立刻跟着变。改动写坏、文件挪位置、分支切到一半，都会让插件当场挂掉（显示
-「异常 / 包不可用」），而使用者可能正在用它。打包安装后 `.dsh` 里是一份独立
-快照，工作树怎么改都不影响正在运行的版本。
-
-安装流程：
-
-```sh
-# 1. 打包（files 字段已声明 host/tools/cordis.patch.yml/README.md）
-cd plugin/pidesk-sync
-npm_config_cache=$(mktemp -d) npm pack --pack-destination ../../dist
-
-# 2. 装进 profile（替换旧条目，不要在 package.json 里手写 link:）
-dsh plugin --profile web add "$(pwd)/../../dist/dsh-pidesk-sync-0.1.1.tgz" \
-  --offline --ignore-scripts
-
-# 3. 重启 DSH Web 进程后生效
-```
-
-约束：
-
-- profile 的 `package.json` 里**不应出现**指向本仓库的 `link:` 条目。
-- 发布新版本要 bump `version`，否则 `.plugin-manager` 的 tgz 文件名相同、难以区分。
-- `tests/` 不在 `files` 里，测试源码不进包，但仓库里必须保留。
-- 打包需要可写的 npm 缓存；环境默认缓存不可写时用 `npm_config_cache` 指到临时目录。
+DSH 同步插件独立维护在 [dsh-plugin-pidesk-sync](https://github.com/MakeEpoch/dsh-plugin-pidesk-sync)；请在该仓库打包安装和测试，不要链接源码到 profile。
 
 ## 硬约束
 
@@ -87,7 +59,7 @@ dsh plugin --profile web add "$(pwd)/../../dist/dsh-pidesk-sync-0.1.1.tgz" \
   判定规则时，同一次改动里更新 `docs/` 对应文件；新增子系统要新建文档并在
   下方索引登记。代码与文档不一致视为未完成。
 - 只改文档措辞、注释、格式而无行为变化的，不需要动 `docs/`。
-- 改完必须跑 `make check`（语法 + 示例配置 + 离线单元/HTTP 测试 + 插件测试）。
+- 改完必须跑 `make check`（语法 + 示例配置 + 离线单元/HTTP 测试）。
 - 测试**不得访问**外部 API、物理屏、喇叭、真实 /proc 之外的硬件。
 - 本地预览用 `make preview`（离线、`--web-only`），**不碰** GPIO/framebuffer/Chromium。
 - 部署走 `make deploy HOST=pi@<ip>`；脚本保留设备配置与天气缓存，失败会回退。
@@ -106,7 +78,7 @@ dsh plugin --profile web add "$(pwd)/../../dist/dsh-pidesk-sync-0.1.1.tgz" \
 | [docs/hardware.md](docs/hardware.md) | 硬件、驱动、维护 |
 | [docs/ui.md](docs/ui.md) | 界面说明 |
 | [docs/verification.md](docs/verification.md) | 验证流程 |
-| [plugin/pidesk-sync/README.md](plugin/pidesk-sync/README.md) | DSH 宿主插件：聚合与推送、Bark 手机通知、配置项 |
+| [dsh-plugin-pidesk-sync](https://github.com/MakeEpoch/dsh-plugin-pidesk-sync) | 独立 DSH 宿主插件：聚合与推送、Bark 手机通知、配置项 |
 
 ## 已知问题
 

@@ -1,7 +1,7 @@
 # 代理任务看板
 
 信息屏右侧「智能体任务」模块的数据来源、协议与跨机推送方式。
-实现见 `app/src/pidesk/agents.py`（屏幕侧）与 `plugin/pidesk-sync/`（采集与推送侧）。
+实现见 `app/src/pidesk/agents.py`（屏幕侧）与 [dsh-plugin-pidesk-sync](https://github.com/MakeEpoch/dsh-plugin-pidesk-sync)（采集与推送侧）。
 
 ## 数据来源
 
@@ -103,9 +103,9 @@ Content-Type: application/json
 
 ### A. DSH 宿主插件（工作站，推荐）
 
-`plugin/pidesk-sync` 定时（默认 15 秒）扫描本机 `~/.dsh` 与 `~/.codex`，
+`dsh-plugin-pidesk-sync` 定时（默认 15 秒）扫描本机 `~/.dsh` 与 `~/.codex`，
 聚合成全量快照推给 pidesk。装法与配置项见
-[插件说明](../plugin/pidesk-sync/README.md)。
+[插件说明](https://github.com/MakeEpoch/dsh-plugin-pidesk-sync)。
 
 - 优点：全量、幂等、自带失败重试与缓存；可与 Bark 手机通知共用边沿判定。
 - 局限：只读**本机**数据；`pidesk-sync` 是 DSH 插件，纯 Codex 环境无法使用。
@@ -149,7 +149,7 @@ Codex 自带 hooks 机制（`~/.codex/hooks.json` 或 `config.toml` 的 `[[hooks
 
 插件侧另有 Bark 通道，在 `running → done/needs_input` 边沿推送到手机，
 锁屏时镜像到 Apple Watch。属于旁路：pidesk 不可达时照样推送。
-详见[插件说明](../plugin/pidesk-sync/README.md#手机--手表推送bark)。
+详见[插件说明](https://github.com/MakeEpoch/dsh-plugin-pidesk-sync#手机--手表推送bark)。
 
 ## 排障
 
