@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pidesk"
+version = "0.1.0"
+description = "A small Raspberry Pi desktop information display"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+dependencies = ["Pillow>=10", "numpy>=1.24", "websocket-client>=1.6"]
+
+[project.scripts]
+pidesk = "pidesk.app:main"
+
+[tool.setuptools.packages.find]
+where = ["app/src"]
+
+# 前端源码在 app/web，安装脚本会把它放进包内 pidesk/web。
+# 从工作树直接以可编辑模式安装时不带前端，开发请用 make preview。
+[tool.setuptools.package-data]
+pidesk = ["web/*.html", "web/*.css", "web/*.js"]
+
+[project.optional-dependencies]
+dev = ["ruff==0.15.11"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"

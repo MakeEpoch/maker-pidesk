@@ -1,0 +1,22 @@
+[Unit]
+Description=pidesk HTML calendar and weather display
+Requires=pidesk-kedei.service
+After=pidesk-kedei.service pidesk-dashboard.service pidesk-console-test.service getty@tty1.service
+PartOf=pidesk-kedei.service
+Conflicts=pidesk-dashboard.service pidesk-console-test.service getty@tty1.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/pidesk-dashboard
+Environment=PYTHONPATH=/opt/pidesk-dashboard/src
+ExecStart=/usr/bin/python3 -m pidesk
+Restart=on-failure
+RestartSec=10
+StateDirectory=pidesk-dashboard
+RuntimeDirectory=pidesk-html
+UMask=0022
+TimeoutStopSec=25
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=pidesk-kedei.service

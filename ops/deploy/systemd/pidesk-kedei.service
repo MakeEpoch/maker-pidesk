@@ -1,0 +1,9 @@
+[Unit]
+Description=Load KeDei V6.2 display after normal boot
+After=ssh.service NetworkManager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/pidesk-kedei-start
+RemainAfterExit=yes
+TimeoutStartSec=90

@@ -1,0 +1,8 @@
+#!/bin/sh
+# Load the LCD after normal boot, leaving SSH available for diagnosis.
+set -eu
+/usr/sbin/modprobe fb_kedei62_linux618
+if ! grep -q 'kedei62' /proc/fb; then
+    /usr/bin/dtoverlay kedei62-native rotate=0
+fi
+/usr/local/sbin/kedei62-console

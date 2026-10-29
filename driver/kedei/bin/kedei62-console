@@ -1,0 +1,24 @@
+#!/usr/bin/python3
+"""Bind Linux virtual consoles to the KeDei screen by driver name."""
+import fcntl
+from pathlib import Path
+import struct
+import time
+
+for attempt in range(120):
+    candidates = [p for p in Path('/sys/class/graphics').glob('fb[0-9]*')
+                  if (p / 'name').read_text().strip() == 'kedei62']
+    if candidates:
+        fb = candidates[0]
+        index = int(fb.name[2:])
+        with open('/dev/' + fb.name, 'r+b', buffering=0) as device:
+            for console in range(1, 7):
+                fcntl.ioctl(device, 0x4610, struct.pack('II', console, index))
+        cursor = Path('/sys/class/graphics/fbcon/cursor_blink')
+        if cursor.exists():
+            cursor.write_text('0\n')
+        print(f'Bound consoles 1-6 to {fb.name} (kedei62)')
+        break
+    time.sleep(0.25)
+else:
+    raise SystemExit('KeDei framebuffer did not appear within 30 seconds')

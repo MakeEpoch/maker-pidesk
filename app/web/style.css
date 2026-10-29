@@ -1,0 +1,905 @@
+:root {
+  color-scheme: dark;
+  --bg: #000;
+  --text: #f0f7fa;
+  --muted: #b3c8df;
+  --mint: #06e4e6;
+  --gold: #ffcf54;
+  --line: #174357;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  min-height: 100%;
+  height: auto;
+  background: #0c111a;
+  font-family: 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', sans-serif;
+  color: var(--text);
+  font-weight: 700;
+  font-synthesis: none;
+}
+.app-shell {
+  max-width: 1240px;
+  margin: auto;
+  padding: 30px 26px;
+}
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+.eyebrow {
+  font:
+    700 10px 'DejaVu Sans',
+    sans-serif;
+  letter-spacing: 2px;
+  color: var(--mint);
+}
+.app-header h1 {
+  font-size: 26px;
+  margin: 7px 0;
+}
+.app-header p {
+  font-size: 13px;
+  color: #8fa1b7;
+  margin: 0;
+}
+.connection {
+  font-size: 12px;
+  padding: 7px 12px;
+  border-radius: 20px;
+  background: #12332e;
+  color: var(--mint);
+}
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 24px;
+  align-items: start;
+}
+.preview-panel {
+  position: sticky;
+  top: 22px;
+  border: 1px solid #243141;
+  border-radius: 14px;
+  background: #101823;
+  overflow: hidden;
+}
+.preview-heading {
+  padding: 18px 20px;
+  border-bottom: 1px solid #243141;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.preview-heading h2 {
+  font-size: 16px;
+  margin: 0 0 4px;
+}
+.preview-heading span,
+.preview-heading b {
+  font-size: 11px;
+  color: #91a5bb;
+}
+.preview-stage {
+  min-height: 380px;
+  display: grid;
+  place-items: center;
+  padding: 20px 12px;
+  background: #06090e;
+  overflow: hidden;
+}
+.screen-wrap {
+  position: relative;
+  flex: none;
+}
+#desk {
+  width: 480px;
+  height: 320px;
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  background: #000;
+  transform-origin: top left;
+}
+#desk:after {
+  content: '';
+  position: absolute;
+  left: 199px;
+  top: 50px;
+  bottom: 24px;
+  border-left: 1px solid #123542;
+  pointer-events: none;
+}
+#desk > header {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 9px;
+  height: 36px;
+  border-bottom: 1px solid var(--line);
+  padding: 0 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#date {
+  font-size: 14px;
+  white-space: nowrap;
+  line-height: 20px;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+#system {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font:
+    700 9px 'DejaVu Sans',
+    sans-serif;
+  color: var(--muted);
+  white-space: nowrap;
+}
+#system > span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+#system > span + span {
+  border-left: 1px solid var(--line);
+  padding-left: 5px;
+}
+#system svg {
+  width: 10px;
+  height: 10px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+#system .wifi {
+  color: var(--mint);
+}
+.clock {
+  position: absolute;
+  top: 46px;
+  left: 18px;
+  width: 172px;
+}
+.clock time {
+  display: block;
+  font:
+    700 52px/1 'DejaVu Sans Mono',
+    monospace;
+  letter-spacing: -3px;
+  white-space: nowrap;
+  color: #f5ffff;
+}
+.year-separator {
+  position: absolute;
+  left: 18px;
+  top: 110px;
+  width: 172px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.year {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.year i {
+  height: 4px;
+  flex: 1;
+  /* 蓝色轨道；灰色填充 = 今年已过的比例 */
+  background: #0aa2b5;
+  overflow: hidden;
+  border-radius: 3px;
+}
+.year b {
+  height: 100%;
+  display: block;
+  background: #9db2c5;
+}
+.weather {
+  position: absolute;
+  left: 18px;
+  top: 132px;
+  width: 172px;
+}
+.weather-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 96px 70px;
+  grid-template-rows: 22px 74px 18px;
+  gap: 8px 6px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+.weather-heading {
+  grid-column: 1/-1;
+  grid-row: 1;
+  margin: 0;
+  font-size: 18px;
+  line-height: 22px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+#condition {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--muted);
+}
+#stale {
+  font-size: 10px;
+  color: var(--gold);
+  margin-left: auto;
+}
+#temperature {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: center;
+  justify-self: start;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  font:
+    700 60px/1 'DejaVu Sans',
+    sans-serif;
+  letter-spacing: -2px;
+}
+#temperature sup {
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: 0;
+  align-self: flex-start;
+  margin-top: 10px;
+  margin-left: -2px;
+}
+.weather-details {
+  grid-column: 1/-1;
+  grid-row: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
+  color: var(--text);
+  font:
+    700 11px 'DejaVu Sans',
+    sans-serif;
+  white-space: nowrap;
+}
+.weather-details > div {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.weather-details > div + div {
+  border-left: 1px solid var(--line);
+  padding-left: 4px;
+}
+.weather-details svg {
+  width: 10px;
+  height: 16px;
+  fill: none;
+  stroke: #06c6ed;
+  stroke-width: 2;
+}
+.weather-details > div:last-child svg {
+  fill: #06bde9;
+  stroke-width: 1.2;
+}
+.weather-icon {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  justify-self: center;
+  width: 80px;
+  height: 80px;
+}
+.weather-icon svg {
+  width: 80px;
+  height: 80px;
+  overflow: visible;
+}
+svg .sun,
+svg .cloud,
+svg .drops {
+  transform: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+.reserved {
+  position: absolute;
+  left: 208px;
+  right: 16px;
+  top: 50px;
+  bottom: 24px;
+}
+#desk.portrait {
+  width: 320px;
+  height: 480px;
+}
+#desk.portrait:after {
+  display: none;
+}
+#desk.portrait header {
+  height: 59px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 7px;
+}
+#desk.portrait #date {
+  font-size: 16px;
+}
+#desk.portrait .clock {
+  left: 74px;
+  top: 80px;
+}
+#desk.portrait .year-separator {
+  left: 74px;
+  top: 152px;
+}
+#desk.portrait .weather {
+  left: 74px;
+  top: 180px;
+}
+#desk.portrait .reserved {
+  left: 18px;
+  right: 18px;
+  top: 326px;
+  bottom: 18px;
+}
+
+#desk > header,
+.clock,
+.year-separator,
+.weather,
+.reserved {
+  z-index: 1;
+}
+#desk:after {
+  z-index: 2;
+}
+.weather-card {
+  background: transparent;
+}
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.control-intro h2 {
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+.control-intro p {
+  font-size: 12px;
+  color: #8fa1b7;
+  margin: 0;
+}
+.control-card {
+  background: #121c29;
+  border: 1px solid #263548;
+  border-radius: 12px;
+  padding: 16px;
+}
+.control-card h3 {
+  font-size: 14px;
+  margin: 0 0 12px;
+}
+input[type='range'] {
+  display: block;
+  width: 100%;
+  margin: 14px 0;
+  accent-color: #06e4e6;
+  cursor: pointer;
+}
+.field-help {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #91a5bb;
+  margin: 7px 0 10px;
+}
+.angle-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+.angle-buttons button,
+.widget-buttons button {
+  border: 1px solid #314254;
+  border-radius: 7px;
+  background: #0c1420;
+  color: #becdde;
+  cursor: pointer;
+  padding: 10px;
+  font-weight: 700;
+}
+.angle-buttons button.active,
+.widget-buttons button.active {
+  border-color: #06e4e6;
+  background: #0b3237;
+  color: #6ff4e5;
+}
+.widget-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.widget-buttons button {
+  text-align: left;
+}
+.widget-buttons b,
+.widget-buttons small {
+  display: block;
+}
+.widget-buttons b {
+  font:
+    700 13px 'Noto Sans CJK SC',
+    sans-serif;
+}
+.widget-buttons small {
+  font:
+    400 10px 'Noto Sans CJK SC',
+    sans-serif;
+  color: #8ca0b6;
+  margin-top: 4px;
+}
+.save-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px 15px;
+  background: #121c29;
+  border: 1px solid #263548;
+  border-radius: 10px;
+}
+.save-bar span {
+  font-size: 11px;
+  color: #9db2c5;
+}
+.save-bar button {
+  padding: 7px 11px;
+  color: #061d1d;
+  background: #06e4e6;
+  border: 0;
+  border-radius: 5px;
+  font:
+    700 11px 'Noto Sans CJK SC',
+    sans-serif;
+  cursor: pointer;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #06e4e6;
+  outline-offset: 3px;
+}
+.widget-empty {
+  font-size: 13px;
+  color: var(--muted);
+  padding: 12px;
+  line-height: 1.7;
+}
+.right-calendar h2,
+.right-forecast h2 {
+  font-size: 17px;
+  color: var(--gold);
+  margin: 1px 0 13px;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  gap: 5px 1px;
+}
+.calendar-grid .weekday {
+  font-size: 13px;
+  color: var(--muted);
+  height: 22px;
+}
+.calendar-grid .day {
+  font:
+    700 14px/25px 'DejaVu Sans',
+    sans-serif;
+  border-radius: 5px;
+  width: 28px;
+  justify-self: center;
+  height: 25px;
+}
+.calendar-grid .weekend {
+  color: var(--gold);
+}
+.calendar-grid .today {
+  background: var(--mint);
+  color: #000;
+}
+.forecast-item {
+  display: grid;
+  grid-template-columns: 36px 31px 1fr auto;
+  gap: 4px;
+  align-items: center;
+  height: 58px;
+  font-size: 14px;
+}
+.forecast-item svg {
+  width: 31px;
+  height: 31px;
+}
+.forecast-item .description {
+  font-size: 14px;
+  color: var(--muted);
+}
+.forecast-item .temperatures {
+  font:
+    700 12px 'DejaVu Sans',
+    sans-serif;
+}
+body.device {
+  margin: 0;
+  background: #000;
+  height: 100%;
+  overflow: hidden;
+}
+body.device .app-shell {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+body.device .app-header,
+body.device .preview-heading,
+body.device #controls {
+  display: none !important;
+}
+body.device .workspace,
+body.device .preview-panel,
+body.device .preview-stage,
+body.device .screen-wrap {
+  display: block;
+  position: static;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: #000;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+body.device #desk {
+  transform: none !important;
+}
+#desk.portrait .right-calendar h2 {
+  margin-bottom: 5px;
+}
+#desk.portrait .calendar-grid {
+  gap: 1px;
+}
+#desk.portrait .calendar-grid .weekday {
+  height: 16px;
+  font-size: 11px;
+}
+#desk.portrait .calendar-grid .day {
+  height: 15px;
+  line-height: 15px;
+  font-size: 11px;
+}
+#desk.portrait .right-forecast h2 {
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+#desk.portrait .forecast-item {
+  height: 28px;
+  font-size: 12px;
+}
+#desk.portrait .forecast-item .description {
+  font-size: 12px;
+}
+@media (max-width: 1000px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+  .preview-panel {
+    position: static;
+  }
+  .app-shell {
+    max-width: 680px;
+    padding: 20px 14px;
+  }
+  .preview-stage {
+    min-height: 350px;
+  }
+  .app-header h1 {
+    font-size: 23px;
+  }
+}
+[hidden] {
+  display: none !important;
+}
+
+.sound-test-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sound-test-row button {
+  flex: none;
+  background: #06e4e6;
+  color: #061d1d;
+  border: 0;
+  border-radius: 6px;
+  padding: 9px 14px;
+  font:
+    700 12px 'Noto Sans CJK SC',
+    sans-serif;
+  cursor: pointer;
+}
+.sound-test-row button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.sound-test-row span {
+  font-size: 11px;
+  color: #9db2c5;
+  line-height: 1.6;
+}
+
+/* 智能体任务列表：两行卡片，大字号 */
+.right-agents {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  /* 填满预留区域：卡片少时均匀铺满纵向空间，多时滚动 */
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  justify-content: space-evenly;
+}
+.right-agents::-webkit-scrollbar {
+  display: none;
+}
+/* 少量卡片时拉伸填满：卡片均分剩余高度 */
+.right-agents .agent-task {
+  flex: 1 1 auto;
+  max-height: 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.agent-task {
+  padding: 7px 10px 8px;
+  border-radius: 8px;
+  border-left: 3px solid rgba(157, 178, 197, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: none;
+}
+.agent-task.running {
+  border-left-color: #06e4e6;
+}
+.agent-task.needs_input {
+  border-left-color: #6ce0bf;
+}
+/* 第一行：圆点 + 来源·时间 + 标题 */
+.agent-task-head {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
+.agent-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #9db2c5;
+  flex: none;
+  align-self: center;
+}
+.agent-task.running .agent-dot {
+  background: #06e4e6;
+}
+.agent-task.needs_input .agent-dot {
+  background: #6ce0bf;
+}
+.agent-meta {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  flex: none;
+}
+.agent-title {
+  font-size: 14px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: #e6f1f8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+/* 第二行：内容仅一行 */
+.agent-detail {
+  font-size: 12px;
+  color: #b7c8d6;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 桌面宠物：左侧底行，宠物在左、文案在右 */
+.pet {
+  position: absolute;
+  left: 18px;
+  bottom: 6px;
+  /* 与左栏（时钟/天气）同宽：18px 起，宽 172px */
+  width: 172px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+  pointer-events: none;
+  z-index: 3;
+  box-sizing: border-box;
+}
+.pet-body {
+  width: 30px;
+  height: 26px;
+  border-radius: 15px 15px 11px 11px;
+  background: linear-gradient(180deg, #f4c56a, #d8a44e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+  flex: none;
+}
+.pet-face {
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: #3a2c12;
+  font-family: 'DejaVu Sans', sans-serif;
+}
+.pet-bubble {
+  font-style: normal;
+  /* i 是 inline：max-width/ellipsis 需要 block 级盒 */
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 10px;
+  color: var(--muted);
+  background: rgba(10, 26, 36, 0.75);
+  border-radius: 8px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+}
+/* 颜色语义：进行中=黄（默认），待回答=红，空闲=绿 */
+.pet[data-mood='working'] .pet-body {
+  animation: pet-bounce 1.2s ease-in-out infinite;
+}
+.pet[data-mood='alert'] .pet-body {
+  background: linear-gradient(180deg, #e8635a, #c23e36);
+}
+.pet[data-mood='idle'] .pet-body {
+  background: linear-gradient(180deg, #6ce0bf, #3fa88d);
+}
+
+#desk.portrait .pet {
+  left: 18px;
+  bottom: 6px;
+}
+
+/* 提示音卡片：音量滑块 + 两组音效按钮 + 试听 */
+.notify-field + .notify-field {
+  margin-top: 14px;
+}
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.field-name {
+  font-size: 12px;
+  color: #becdde;
+}
+#notify-volume-value {
+  margin-left: auto;
+  font:
+    700 12px 'DejaVu Sans',
+    monospace;
+  color: var(--mint);
+}
+.style-buttons {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+.style-buttons button {
+  border: 1px solid #314254;
+  border-radius: 6px;
+  background: #0c1420;
+  color: #becdde;
+  cursor: pointer;
+  padding: 8px 2px;
+  font:
+    700 11px 'Noto Sans CJK SC',
+    sans-serif;
+}
+.style-buttons button.active {
+  border-color: #06e4e6;
+  background: #0b3237;
+  color: #6ff4e5;
+}
+.notify-field .field-label button {
+  margin-left: auto;
+  flex: none;
+  background: #06e4e6;
+  color: #061d1d;
+  border: 0;
+  border-radius: 5px;
+  padding: 6px 10px;
+  font:
+    700 11px 'Noto Sans CJK SC',
+    sans-serif;
+  cursor: pointer;
+}
+.notify-field .field-label button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.notify-field .field-label .preview-status {
+  font-size: 11px;
+  color: #9db2c5;
+  line-height: 1.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.notify-field + p.field-help {
+  margin-top: 14px;
+}
+@media (max-width: 480px) {
+  .style-buttons {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* 屏幕色彩增益滑块 */
+.gain-slider {
+  width: 100%;
+}
+#gain-r::-webkit-slider-runnable-track {
+  background: linear-gradient(90deg, #444, #e8635a);
+}
+#gain-g::-webkit-slider-runnable-track {
+  background: linear-gradient(90deg, #444, #6ce0bf);
+}
+#gain-b::-webkit-slider-runnable-track {
+  background: linear-gradient(90deg, #444, #6ca6e0);
+}
+
+/* 照片模块 */
+.right-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>pidesk 字体对比</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    html,
+    body {
+      margin: 0;
+      width: 480px;
+      height: 320px;
+      background: #000;
+      color: #fff;
+    }
+    body {
+      padding: 12px 16px;
+      font-family: sans-serif;
+    }
+    .label {
+      font:
+        700 12px/18px 'DejaVu Sans',
+        sans-serif;
+      color: #06e4e6;
+    }
+    .sample {
+      margin-top: 6px;
+      line-height: 24px;
+      white-space: nowrap;
+    }
+    section {
+      height: 94px;
+      border-bottom: 1px solid #234252;
+      padding-top: 4px;
+    }
+    .a .sample {
+      font: 700 14px/24px 'WenQuanYi Micro Hei';
+    }
+    .b .sample {
+      font: 700 16px/24px 'Noto Sans CJK SC';
+      font-synthesis: none;
+    }
+    .c .sample {
+      font: 400 16px/24px Unifont;
+    }
+    .hint {
+      margin-top: 8px;
+      font: 400 11px sans-serif;
+      color: #a9c0da;
+    }
+  </style>
+  <section class="a">
+    <div class="label">A · WenQuanYi / 14px / synthetic bold</div>
+    <div class="sample">
+      南京 晴间多云 未来三天 月历星期日<br />24° 60% 42% 明天 14/23° 后天 14/20°
+    </div>
+  </section>
+  <section class="b">
+    <div class="label">B · Noto Sans CJK SC / 16px / real bold</div>
+    <div class="sample">
+      南京 晴间多云 未来三天 月历星期日<br />24° 60% 42% 明天 14/23° 后天 14/20°
+    </div>
+  </section>
+  <section class="c">
+    <div class="label">C · Unifont / 16px / pixel font</div>
+    <div class="sample">
+      南京 晴间多云 未来三天 月历星期日<br />24° 60% 42% 明天 14/23° 后天 14/20°
+    </div>
+  </section>
+  <div class="hint">pidesk · font comparison · native 480 × 320</div>
+  <script src="/font-check.js"></script>
+</html>

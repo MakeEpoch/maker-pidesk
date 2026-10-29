@@ -1,0 +1,12 @@
+{
+  "name": "pidesk-web-tools",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "format": "prettier --write app/web plugin/*/host plugin/*/tools",
+    "format:check": "prettier --check app/web plugin/*/host plugin/*/tools"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}

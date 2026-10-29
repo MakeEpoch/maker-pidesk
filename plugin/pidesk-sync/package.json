@@ -1,0 +1,33 @@
+{
+  "name": "@dsh/pidesk-sync",
+  "version": "0.1.0",
+  "description": "DSH 会话任务看板：聚合 DSH/Codex 任务进度，推送到 pidesk 信息屏",
+  "type": "module",
+  "main": "./host/index.js",
+  "exports": {
+    ".": "./host/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "host",
+    "tools",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.16"
+  },
+  "dsh": {
+    "engines": {
+      "dsh": ">=0.2.1-rc.2 <0.3.0"
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "test": "node --test tests/run.mjs"
+  },
+  "license": "MIT"
+}

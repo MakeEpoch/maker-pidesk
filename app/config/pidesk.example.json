@@ -1,0 +1,17 @@
+{
+  "location_mode": "ip",
+  "accepted_country": "CN",
+  "fallback": {
+    "city": "南京",
+    "latitude": 32.0617,
+    "longitude": 118.7778
+  },
+  "timezone": "Asia/Shanghai",
+  "weather_interval": 900,
+  "location_interval": 21600,
+  "agent_push_token": "",
+  "html_animation": false,
+  "html_frame_interval": 1.0,
+  "html_rotation": 0,
+  "html_right_widget": "none"
+}

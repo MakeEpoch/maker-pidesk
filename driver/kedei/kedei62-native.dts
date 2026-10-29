@@ -1,0 +1,42 @@
+/dts-v1/;
+/plugin/;
+/ {
+    compatible = "brcm,bcm2835";
+    fragment@0 {
+        target = <&spi0>;
+        __overlay__ {
+            status = "okay";
+            #address-cells = <1>;
+            #size-cells = <0>;
+            num-cs = <1>;
+            cs-gpios = <&gpio 7 1>;
+            kedei62: display@0 {
+                compatible = "kedei,kedei62";
+                reg = <0>;
+                spi-max-frequency = <16000000>;
+                buswidth = <8>;
+                regwidth = <8>;
+                rotate = <0>;
+                fps = <10>;
+                latch-gpios = <&gpio 8 0>;
+            };
+        };
+    };
+    fragment@1 {
+        target = <&spidev0>;
+        __overlay__ { status = "disabled"; };
+    };
+    fragment@2 {
+        target = <&spidev1>;
+        __overlay__ { status = "disabled"; };
+    };
+    fragment@3 {
+        target = <&spi0_cs_pins>;
+        __overlay__ { brcm,pins = <7>; };
+    };
+    __overrides__ {
+        rotate = <&kedei62>, "rotate:0";
+        speed = <&kedei62>, "spi-max-frequency:0";
+        fps = <&kedei62>, "fps:0";
+    };
+};

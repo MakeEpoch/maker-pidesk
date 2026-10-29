@@ -1,0 +1,10 @@
+[Unit]
+Description=Initialize KeDei display 30 seconds after boot
+
+[Timer]
+OnBootSec=30s
+AccuracySec=1s
+Unit=pidesk-kedei.service
+
+[Install]
+WantedBy=timers.target

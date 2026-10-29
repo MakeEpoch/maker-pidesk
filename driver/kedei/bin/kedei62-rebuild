@@ -1,0 +1,15 @@
+#!/bin/sh
+# Rebuild this external display module when matching kernel headers are installed.
+set -eu
+version=${1:?Missing kernel version}
+source_dir=/usr/local/src/kedei62-driver
+build_dir=/lib/modules/$version/build
+[ -f "$build_dir/Makefile" ] || exit 0
+[ -f "$source_dir/Makefile" ] || exit 0
+# Build in a temporary tree so concurrent kernel hooks cannot share objects.
+build_tmp=$(mktemp -d /var/tmp/kedei62-build.XXXXXX)
+trap 'rm -rf "$build_tmp"' EXIT HUP INT TERM
+cp "$source_dir/fb_kedei62_linux618.c" "$source_dir/fbtft.h" "$source_dir/Makefile" "$build_tmp/"
+make -C "$build_dir" M="$build_tmp" modules -j2
+install -D -m 644 "$build_tmp/fb_kedei62_linux618.ko" "/lib/modules/$version/updates/fb_kedei62_linux618.ko"
+depmod -a "$version"
