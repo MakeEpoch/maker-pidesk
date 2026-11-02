@@ -1,7 +1,8 @@
 # pidesk
 
 树莓派桌面信息屏：时钟、日期、当前天气、年度进度，以及可选的月历或三天天气。
-控制网页提供实时预览、四向旋转、右侧模块切换和喇叭声音测试。
+控制网页提供固定画布编辑器：24 项元素自由拖拽、分组与对齐、属性调整、撤销重做、
+模板和布局导入导出；横竖屏分别编辑，草稿确认后应用。声音提醒与屏幕校色独立设置。
 
 当前硬件：Raspberry Pi 3B、KeDei 3.5 寸 V6.2（480×320 SPI）、3.5mm 音频输出。
 当前验证系统：Raspberry Pi OS Lite Trixie 64 位，Linux 6.18.50+rpt-rpi-v8。
@@ -58,11 +59,12 @@ Mac 上没有 `/proc` 的指标会显示缺省值；声音按钮需要在树莓�
 
 ## 树莓派部署
 
-现有设备应用更新：
+现有设备应用更新（可先按 [部署说明](docs/deployment.md) 配置本地 `.env.deploy.local`）：
 
 ```sh
 make check
-make deploy HOST=pi@your-pi.local
+make deploy
+# 或显式指定目标：make deploy HOST=pi@your-pi.local
 ```
 
 部署脚本使用 SSH/SCP，密码由终端交互输入或使用 SSH 密钥，不在项目保存。
@@ -93,7 +95,8 @@ sudo journalctl -u pidesk-html.service -n 30 --no-pager
 ## 已知限制
 
 SPI 全屏更新较慢，页面使用静态内容及变化区域刷新；没有动画。
-实机暗色照片出现偏色，模式切换及降速未改善，因此照片/背景和画面亮度功能已移除。
+实机暗色照片仍可能偏色，照片模块保留；校色需对照实体屏幕调整。
+整页背景和画面亮度功能未提供。
 触摸未启用。当前网页用于局域网，没有账户登录。
 
 默认不启用 IP 定位，也不预设城市：请在配置中填写地点及 IANA 时区（默认 UTC）；未设置地点时显示“请配置地点”，不会请求天气。可选择启用 ipwho.is IP 定位并设置国家过滤或备用地点；天气由 Open-Meteo 提供，不是现场观测或预警信息。配置示例见 [部署说明](docs/deployment.md)。
@@ -102,3 +105,5 @@ SPI 全屏更新较慢，页面使用静态内容及变化区域刷新；没有�
 
 应用代码采用 MIT；KeDei 驱动保留 GPL-2.0 声明与原始许可证，
 见 [第三方说明](THIRD_PARTY_NOTICES.md)。
+
+[固定画布编辑器说明](docs/layout-editor.md)

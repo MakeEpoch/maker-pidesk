@@ -41,9 +41,10 @@ function icon(kind) {
 
 let draft = {},
   saveTimer = null,
-  saving = false;
+  saving = false,
+  savePromise = null;
 function shownState() {
-  return { ...state, ...draft };
+  return { ...state, ...draft, ...(window.layoutEditor?.preview() || {}) };
 }
 function resizePreview() {
   if (document.body.classList.contains('device')) return;
@@ -53,11 +54,16 @@ function resizePreview() {
   const portrait = desk.classList.contains('portrait'),
     width = portrait ? 320 : 480,
     height = portrait ? 480 : 320;
-  const scale = Math.min(1, Math.max(0.2, (stage.clientWidth - 24) / width));
+  const requested = $('editor-zoom')?.value || 'fit';
+  const scale =
+    requested === 'fit'
+      ? Math.min(1.6, Math.max(0.2, (stage.clientWidth - 64) / width))
+      : Number(requested);
   wrap.style.width = width * scale + 'px';
   wrap.style.height = height * scale + 'px';
   desk.style.transform = `scale(${scale})`;
   text('preview-size', `${width} × ${height}`);
+  window.layoutEditor?.drawSelection();
 }
 function agentAgo(updated) {
   const seconds = Math.max(0, (Date.now() / 1000 - updated) | 0);
@@ -68,7 +74,9 @@ function agentAgo(updated) {
 }
 function agentTail(title) {
   // 路径类标题只保留尾部关键部分：/a/b/c/d → c/d
-  const parts = String(title || '').split('/').filter(Boolean);
+  const parts = String(title || '')
+    .split('/')
+    .filter(Boolean);
   if (parts.length > 2) return parts.slice(-2).join('/');
   return String(title || '');
 }
@@ -87,7 +95,7 @@ function renderAgentWidget(root, payload) {
   // 优先级：进行中+待回答 > 进行中 > 待回答 > 已完成
   const tasks = [...(payload.agents || [])];
   const priority = (task) =>
-    agentWaiting(task) ? 0 : AGENT_RANK[task.status] ?? AGENT_RANK.done;
+    agentWaiting(task) ? 0 : (AGENT_RANK[task.status] ?? AGENT_RANK.done);
   tasks.sort((a, b) => priority(a) - priority(b) || b.updated - a.updated);
   if (!tasks.length) {
     const e = document.createElement('p');
@@ -127,10 +135,19 @@ function agentTaskRow(task) {
   return row;
 }
 function renderWidget(payload) {
-  const root = $('right-widget'),
-    mode = ['calendar', 'forecast', 'agents', 'photo'].includes(payload.right_widget)
-      ? payload.right_widget
-      : 'none';
+  const elements = PideskLayout.scene(
+    payload.screen_layout,
+    PideskLayout.mode(payload.rotation),
+    payload.right_widget
+  );
+  for (const mode of ['calendar', 'forecast', 'agents', 'photo']) {
+    if (!elements[mode].visible) continue;
+    const root = mode === 'agents' ? $('right-widget') : $('widget-' + mode);
+    if (mode === 'agents') renderAgentWidget(root, payload);
+    else renderWidgetMode(root, mode, payload);
+  }
+}
+function renderWidgetMode(root, mode, payload) {
   const key = JSON.stringify([mode, payload.date, payload.weather?.forecast, payload.photo_url]);
   if (root.dataset.key === key) return;
   root.replaceChildren();
@@ -180,7 +197,8 @@ function renderWidget(payload) {
   }
   const box = document.createElement('div');
   box.className = 'right-forecast';
-  const title = document.createElement('h2');  title.textContent = '未来三天';
+  const title = document.createElement('h2');
+  title.textContent = '未来三天';
   box.append(title);
   const future = (payload.weather?.forecast || [])
     .filter((day) => day.date > payload.date)
@@ -239,15 +257,9 @@ function renderPet(payload) {
     face.className = 'pet-face';
     face.textContent = runningTask ? '◔ ◔' : attention ? '◉ ◉' : '· ·';
     body.append(face);
-    if (bubbleText) {
-      const bubble = document.createElement('i');
-      bubble.className = 'pet-bubble';
-      bubble.textContent = bubbleText;
-      bubble.title = bubbleText;
-      pet.append(body, bubble);
-    } else {
-      pet.append(body);
-    }
+    pet.append(body);
+    text('pet-message', bubbleText);
+    $('pet-message').title = bubbleText;
   }
 }
 function renderScreen(payload) {
@@ -255,40 +267,36 @@ function renderScreen(payload) {
     angle = payload.rotation || 0;
   desk.dataset.motion = 'off';
   desk.classList.toggle('portrait', angle === 90 || angle === 270);
-  const statusKey = JSON.stringify([payload.stats.cpu, payload.stats.memory, payload.ip]);
-  if ($('system').dataset.key !== statusKey) {
-    const chip =
-      '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="1"/><path d="M8 1v4m8-4v4M8 19v4m8-4v4M1 8h4m-4 8h4m14-8h4m-4 8h4"/></svg>';
-    const ram =
-      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5h20v12H2Zm4 3v6m6-6v6m6-6v6M5 17v4m7-4v4m7-4v4"/></svg>';
-    const wifi =
-      '<svg class="wifi" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 8a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0m-11 4a5 5 0 0 1 8 0"/><circle cx="12" cy="20" r="1"/></svg>';
-    const cpu = document.createElement('span');
-    cpu.innerHTML = chip;
-    cpu.append(`CPU ${payload.stats.cpu ?? '--'}%`);
-    const memory = document.createElement('span');
-    memory.innerHTML = ram;
-    memory.append(`内存${payload.stats.memory ?? '--'}%`);
-    const address = document.createElement('span');
-    address.innerHTML = wifi;
-    address.append(payload.ip);
-    $('system').replaceChildren(cpu, memory, address);
-    $('system').dataset.key = statusKey;
-  }
+  text('cpu-value', `CPU ${payload.stats.cpu ?? '--'}%`);
+  text('memory-value', `内存 ${payload.stats.memory ?? '--'}%`);
+  text('ip-value', payload.ip);
   text('clock', payload.time);
-  text('date', payload.date_label.replace(/\s+/, ' '));
+  const dateParts = payload.date_label.split(/\s+/);
+  text('date', dateParts[0]);
+  text('weekday', dateParts.slice(1).join(' '));
   // 灰条宽度 = 今年已过占比；右侧数字 = 剩余占比
   $('year-fill').style.width = payload.year_percent + '%';
   text('year-percent', payload.year_remaining + '%');
   text('city', payload.location.city);
+  const configuredElements = PideskLayout.scene(
+    payload.screen_layout,
+    PideskLayout.mode(payload.rotation),
+    payload.right_widget
+  );
+  const fahrenheit = configuredElements.temperature.unit === 'f';
+  const convert = (value, unit) => Math.round(unit === 'f' ? (value * 9) / 5 + 32 : value);
+  text('temperature-unit', fahrenheit ? '°F' : '°');
   const w = payload.weather;
   if (w) {
     const [kind, label] = weather(w.code);
-    text('temperature-value', Math.round(w.temperature));
+    text('temperature-value', convert(w.temperature, configuredElements.temperature.unit));
     text('humidity', Math.round(w.humidity) + '%');
     text('rain', Math.round(w.rain) + '%');
     text('condition', label);
-    text('range', `${Math.round(w.low)}°/${Math.round(w.high)}°`);
+    text(
+      'range',
+      `${convert(w.low, configuredElements.range.unit)}°/${convert(w.high, configuredElements.range.unit)}°${configuredElements.range.unit === 'f' ? 'F' : ''}`
+    );
     if ($('weather-icon').dataset.kind !== kind) {
       $('weather-icon').innerHTML = icon(kind);
       if (kind === 'sun')
@@ -297,12 +305,57 @@ function renderScreen(payload) {
     }
     text('stale', payload.stale ? '缓存' : '');
   } else {
-    text('condition', payload.location.source === 'unconfigured' ? '请配置地点' : (payload.error ? '天气暂不可用' : '正在获取天气'));
+    text(
+      'condition',
+      payload.location.source === 'unconfigured'
+        ? '请配置地点'
+        : payload.error
+          ? '天气暂不可用'
+          : '正在获取天气'
+    );
     text('stale', '');
+    text('temperature-value', '--');
+    text('range', '--°/--°');
+    text('humidity', '--%');
+    text('rain', '--%');
+    $('weather-icon').replaceChildren();
+    delete $('weather-icon').dataset.kind;
   }
   renderWidget(payload);
   renderPet(payload);
+  renderLayout(payload);
+  text('rotation-summary', `${angle === 90 || angle === 270 ? '竖屏' : '横屏'} · ${angle}°`);
+  const elements = PideskLayout.scene(
+    payload.screen_layout,
+    PideskLayout.mode(payload.rotation),
+    payload.right_widget
+  );
+  const modules = ['calendar', 'forecast', 'agents', 'photo'].filter((id) => elements[id].visible);
+  text('widget-summary', modules.map((id) => WIDGET_NAMES[id]).join(' · ') || '无展示模块');
   resizePreview();
+}
+function renderLayout(payload) {
+  const L = window.PideskLayout;
+  const elements = L.scene(payload.screen_layout, L.mode(payload.rotation), payload.right_widget);
+  const baseline = L.defaults(L.mode(payload.rotation), payload.right_widget);
+  for (const [id, e] of Object.entries(elements)) {
+    const node = document.querySelector(`[data-element="${id}"]`);
+    Object.assign(node.style, {
+      left: e.x + 'px',
+      top: e.y + 'px',
+      width: e.width + 'px',
+      height: e.height + 'px',
+      fontSize: e.font + 'px',
+      color: e.color,
+      zIndex: e.z,
+      textAlign: e.align,
+      display: e.visible ? 'block' : 'none',
+    });
+    node.dataset.overflow = e.overflow;
+    node.dataset.customColor = String(e.color !== baseline[id].color);
+    node.dataset.locked = String(e.locked);
+    node.style.setProperty('--element-color', e.color);
+  }
 }
 const GAIN_FIELDS = [
   ['gain-r', 'color_gain_r'],
@@ -344,12 +397,32 @@ function syncControls(payload) {
     text(id + '-value', value.toFixed(2));
   }
 }
+const WIDGET_NAMES = {
+  none: '留空',
+  calendar: '月历',
+  forecast: '三天天气',
+  agents: '智能体任务',
+  photo: '照片',
+};
+function saveStatus(kind, message) {
+  document.querySelector('.save-bar').dataset.state = kind;
+  text('control-status', message);
+  const pending = Object.keys(draft).length > 0;
+  $('save-settings').disabled = !pending || saving;
+  text('save-settings', kind === 'error' ? '重试保存' : pending ? '立即保存' : '已保存');
+}
 function apply(payload) {
   state = payload;
+  window.layoutEditor?.receive(payload);
   const shown = document.body.classList.contains('device') ? payload : shownState();
   renderScreen(shown);
   syncControls(shown);
+  if (!window.layoutEditor) $('photo-settings').hidden = true;
+  $('settings-content').inert = false;
   text('connection', '已连接');
+  $('connection').dataset.state = 'online';
+  if (document.querySelector('.save-bar').dataset.state === 'loading')
+    saveStatus('saved', '设备设置已读取');
   window.pideskReady = true;
 }
 async function refresh() {
@@ -360,54 +433,100 @@ async function refresh() {
   } catch (error) {
     console.warn(error);
     text('connection', '连接中断');
+    $('connection').dataset.state = 'offline';
     if (state) text('stale', '离线');
+    else saveStatus('loading', '未能读取设备设置，正在重连…');
   }
 }
 function change(key, value) {
   if (!state) return;
   draft[key] = value;
   apply(state);
-  text('control-status', '更改待保存…');
+  saveStatus('pending', '更改待保存…');
   clearTimeout(saveTimer);
   saveTimer = setTimeout(persist, 450);
 }
-async function persist() {
+function persist() {
   clearTimeout(saveTimer);
-  if (saving || !Object.keys(draft).length) return;
+  if (saving) return savePromise;
+  if (!Object.keys(draft).length) return Promise.resolve(true);
   const patch = { ...draft };
   saving = true;
-  $('save-settings').disabled = true;
-  text('control-status', '正在保存…');
-  let success = false;
-  try {
-    const response = await fetch('/api/settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(patch),
-    });
-    if (!response.ok) throw Error('保存失败，请点立即保存重试');
-    const payload = await response.json();
-    Object.entries(patch).forEach(([key, value]) => {
-      if (draft[key] === value) delete draft[key];
-    });
-    apply(payload);
-    success = true;
-    text('control-status', Object.keys(draft).length ? '还有更改待保存…' : '已保存，已同步到小屏');
-  } catch (error) {
-    text('control-status', error.message || '保存失败，请重试');
-  } finally {
-    saving = false;
-    $('save-settings').disabled = false;
-    if (success && Object.keys(draft).length) saveTimer = setTimeout(persist, 100);
+  saveStatus('saving', '正在保存到设备…');
+  savePromise = (async () => {
+    let success = false;
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patch),
+      });
+      if (!response.ok) throw Error('保存失败，修改已保留');
+      const payload = await response.json();
+      Object.entries(patch).forEach(([key, value]) => {
+        if (draft[key] === value) delete draft[key];
+      });
+      apply(payload);
+      success = true;
+    } catch (error) {
+      saveStatus('error', '保存失败，修改已保留');
+    } finally {
+      saving = false;
+      const pending = Object.keys(draft).length > 0;
+      saveStatus(
+        success ? (pending ? 'pending' : 'saved') : 'error',
+        success ? (pending ? '还有更改待保存…' : '已保存到设备') : '保存失败，修改已保留'
+      );
+      if (success && pending) saveTimer = setTimeout(persist, 100);
+    }
+    return success;
+  })();
+  return savePromise;
+}
+async function saveBeforePreview() {
+  while (Object.keys(draft).length || saving) {
+    if (!(await persist())) throw Error('请先重试保存设置，再试听');
   }
 }
 $('save-settings').addEventListener('click', persist);
+const tabs = [...document.querySelectorAll('[data-tab]')];
+function selectTab(tab) {
+  for (const item of tabs) {
+    const selected = item === tab;
+    item.setAttribute('aria-selected', String(selected));
+    item.tabIndex = selected ? 0 : -1;
+    $('panel-' + item.dataset.tab).hidden = !selected;
+  }
+  document.querySelector('.autosave-label').textContent =
+    tab.dataset.tab === 'layout' ? '草稿编辑' : '自动保存';
+  resizePreview();
+}
+for (const tab of tabs) {
+  tab.addEventListener('click', () => selectTab(tab));
+  tab.addEventListener('keydown', (event) => {
+    let index = tabs.indexOf(tab);
+    if (event.key === 'ArrowRight') index = (index + 1) % tabs.length;
+    else if (event.key === 'ArrowLeft') index = (index + tabs.length - 1) % tabs.length;
+    else if (event.key === 'Home') index = 0;
+    else if (event.key === 'End') index = tabs.length - 1;
+    else return;
+    event.preventDefault();
+    selectTab(tabs[index]);
+    tabs[index].focus();
+  });
+}
+window.addEventListener('beforeunload', (event) => {
+  if (!Object.keys(draft).length && !window.layoutEditor?.hasUnstoredDraft()) return;
+  event.preventDefault();
+  event.returnValue = '';
+});
 $('sound-test').addEventListener('click', async () => {
   const button = $('sound-test');
   button.disabled = true;
   button.textContent = '正在播放…';
   text('sound-status', '请听树莓派喇叭');
   try {
+    await saveBeforePreview();
     const response = await fetch('/api/sound-test', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -443,20 +562,14 @@ for (const [id, field] of GAIN_FIELDS) {
     const value = Number(event.target.value);
     text(id + '-value', value.toFixed(2));
     change(field, value);
-    text('gain-status', '已调整，立即生效');
+    text('gain-status', '调整后自动保存，请观察实体屏幕');
   });
 }
 $('gain-reset').addEventListener('click', () => {
-  $('gain-r').value = '1';
-  $('gain-g').value = '1.00';
-  $('gain-b').value = '1.00';
-  text('gain-r-value', '1.00');
-  text('gain-g-value', '1.00');
-  text('gain-b-value', '1.00');
   change('color_gain_r', 1);
-  change('color_gain_g', 1);
-  change('color_gain_b', 1);
-  text('gain-status', '已恢复默认');
+  change('color_gain_g', 0.98);
+  change('color_gain_b', 0.97);
+  text('gain-status', '默认增益已恢复，正在保存');
 });
 // 照片上传
 $('photo-upload').addEventListener('click', () => $('photo-file').click());
@@ -483,12 +596,9 @@ $('photo-file').addEventListener('change', async () => {
     // 立即刷新页面里的照片（不必等轮询）
     if (state) {
       state.photo_url = result.url;
-      if (state.right_widget !== 'photo') change('right_widget', 'photo');
-      else {
-        const widget = $('right-widget');
-        delete widget.dataset.key;
-        renderWidget(document.body.classList.contains('device') ? state : shownState());
-      }
+      delete $('widget-photo').dataset.key;
+      window.layoutEditor?.showPhoto();
+      renderWidget(document.body.classList.contains('device') ? state : shownState());
     }
   } catch (error) {
     text('photo-status', error.message || '上传失败，请重试');
@@ -500,9 +610,7 @@ $('photo-file').addEventListener('change', async () => {
 });
 // 任务完成 / 待回答音效
 for (const button of document.querySelectorAll('[data-style-field]'))
-  button.addEventListener('click', () =>
-    change(button.dataset.styleField, button.dataset.style)
-  );
+  button.addEventListener('click', () => change(button.dataset.styleField, button.dataset.style));
 async function previewNotify(kind) {
   const button = $('notify-test-' + kind);
   const status = 'notify-status-' + kind;
@@ -510,6 +618,7 @@ async function previewNotify(kind) {
   button.textContent = '播放中…';
   text(status, '请听树莓派喇叭');
   try {
+    await saveBeforePreview();
     const response = await fetch('/api/notify-test', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -520,8 +629,7 @@ async function previewNotify(kind) {
         response.status === 409 ? '正在播放，请稍后再试' : '播放失败，请检查喇叭连接后重试'
       );
     const result = await response.json();
-    if (!result.ok)
-      throw Error(result.busy ? '正在播放，请稍后再试' : '播放失败，请重试');
+    if (!result.ok) throw Error(result.busy ? '正在播放，请稍后再试' : '播放失败，请重试');
     text(status, result.silent ? '当前为静音音效' : '提示音已播放');
   } catch (error) {
     text(status, error.message || '连接失败，请重试');

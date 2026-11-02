@@ -23,6 +23,7 @@ INCLUDE = (
     ".prettierrc.json",
     ".editorconfig",
     ".gitignore",
+    ".env.deploy.example",
 )
 EXCLUDE = {"__pycache__", ".DS_Store", "build", "dist"}
 

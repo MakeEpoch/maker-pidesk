@@ -31,6 +31,7 @@ from .framebuffer import (
     write_snapshot,
 )
 from .storage import DEFAULT, read_json
+from .layouts import EMPTY_LAYOUT, valid_layout
 from .system import local_ip, metrics, read_cpu
 from .weather import Weather
 
@@ -49,6 +50,7 @@ ANGLES = (0, 90, 180, 270)
 WIDGETS = ("none", "calendar", "forecast", "agents", "photo")
 NOTIFY_STYLES = ("chime", "double", "soft", "rising", "bell", "none")
 CONTROL_FIELDS = {
+    "screen_layout": ("html_screen_layout", EMPTY_LAYOUT),
     "rotation": ("html_rotation", 0),
     "right_widget": ("html_right_widget", "none"),
     "notify_volume": ("html_notify_volume", 0.18),
@@ -118,6 +120,8 @@ class State:
 
     @staticmethod
     def validate_control(key, value):
+        if key == "screen_layout":
+            return valid_layout(value)
         if key == "rotation":
             return type(value) is int and value in ANGLES
         if key == "right_widget":
@@ -174,7 +178,7 @@ class State:
 
     def render_signature(self):
         # controls 包含 color_gain_*：增益变化会触发浏览器重画与全屏刷新
-        return tuple(self.controls().values())
+        return json.dumps(self.controls(), sort_keys=True, separators=(",", ":"))
 
     def payload(self):
         now = datetime.now(ZoneInfo(self.config["timezone"]))
@@ -260,7 +264,7 @@ def server_for(state, host, port):
                     return
             try:
                 length = int(self.headers.get("Content-Length", "0"))
-                limit = 65536 if push else 2048
+                limit = 65536 if push else 32768 if self.path == "/api/settings" else 2048
                 if not 0 < length <= limit:
                     raise ValueError("Invalid request size")
                 self.connection.settimeout(15)
@@ -397,6 +401,9 @@ def server_for(state, host, port):
                 "/index.html",
                 "/style.css",
                 "/app.js",
+                "/layout.js",
+                "/editor.js",
+                "/layout.css",
                 "/font-check.html",
                 "/font-check.js",
             ):

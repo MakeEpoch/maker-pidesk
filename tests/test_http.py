@@ -48,7 +48,7 @@ class HttpTests(unittest.TestCase):
             html = r.read().decode()
             self.assertIn('id="sound-test"', html)
             self.assertIn('id="photo-file"', html)
-        for path in ("/app.js", "/style.css", "/font-check.html", "/font-check.js"):
+        for path in ("/app.js", "/style.css", "/layout.js", "/editor.js", "/layout.css", "/font-check.html", "/font-check.js"):
             with self.request(path) as r:
                 self.assertGreater(len(r.read()), 0)
         with self.request("/api/state") as r:
@@ -83,6 +83,25 @@ class HttpTests(unittest.TestCase):
         with self.request("/api/rotation", {"angle": 180}) as r:
             self.assertEqual(json.load(r), {"angle": 180})
         self.assertEqual(json.loads(self.config.read_text())["html_rotation"], 180)
+
+    def test_full_layout_request_and_limit(self):
+        from pidesk.layouts import ELEMENT_IDS, EMPTY_LAYOUT
+        layout = {"version": 1}
+        element = {"x": 20, "y": 30, "width": 80, "height": 40, "font": 18,
+                   "color": "#abcdef", "visible": True, "locked": False, "z": 1,
+                   "align": "center", "overflow": "ellipsis", "group": "none"}
+        for mode in ("landscape", "portrait"):
+            layout[mode] = {key: dict(element) for key in ELEMENT_IDS}
+        request = {"screen_layout": layout, "rotation": 90}
+        self.assertGreater(len(json.dumps(request)), 2048)
+        with self.request("/api/settings", request) as response:
+            self.assertEqual(json.load(response)["screen_layout"], layout)
+        original = self.config.read_bytes()
+        with self.assertRaises(urllib.error.HTTPError) as error:
+            self.request("/api/settings", {"screen_layout": layout, "padding": "x" * 32768})
+        self.assertEqual(error.exception.code, 400)
+        self.assertEqual(self.config.read_bytes(), original)
+        self.state.update_controls({"screen_layout": copy.deepcopy(EMPTY_LAYOUT), "rotation": 0})
 
     def test_unknown_and_removed_routes_are_rejected(self):
         for path, data, status in (

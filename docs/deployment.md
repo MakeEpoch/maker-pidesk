@@ -2,8 +2,30 @@
 
 ## 已配置好的树莓派
 
-在开发机运行 `make deploy HOST=pi@your-pi.local`。脚本生成发布包，上传到远端
-临时目录，再交互执行 `sudo bash ops/scripts/install.sh`。SSH、sudo 自行输入凭据。
+开发机可将 `.env.deploy.example` 复制为 `.env.deploy.local`，填写目标地址、端口、
+SSH 用户/密钥或密码。该文件已加入 Git 忽略，也不进入发布包，权限应设为 `0600`：
+
+```sh
+cp .env.deploy.example .env.deploy.local
+chmod 600 .env.deploy.local
+# 编辑本地文件后执行
+make deploy
+```
+
+部署仍通过 `ops/scripts/deploy.sh` 打包、SCP 上传和远程安装，不另建发布流程。
+`make deploy HOST=pi@your-pi.local` 可覆盖目标；与本地文件目标不同时，不复用该文件中的
+密码或密钥。`PIDESK_DEPLOY_ENV_FILE` 可以指定另一份本地环境文件。
+
+本地设置项：`PIDESK_DEPLOY_HOST`、`PIDESK_DEPLOY_PORT`（默认 22）、
+`PIDESK_DEPLOY_KEY`（可空）、`PIDESK_DEPLOY_KNOWN_HOSTS`（相对项目根或绝对路径）、
+`PIDESK_DEPLOY_PASSWORD`（可空）、`PIDESK_DEPLOY_SUDO_PASSWORD`（省略则沿用 SSH 密码）。
+密码部署需要开发机已有 `sshpass`，密码仅通过子进程环境和 SSH 标准输入传递，不进入命令参数；
+未填写密码时继续使用现有 SSH 认证及交互 sudo。独立 known-hosts 文件首次接受新主机密钥，
+后续拒绝发生变化的密钥；示例文件使用已忽略的 `var/deploy-known-hosts`。
+本地文件是可信 shell 赋值，不能加载不可信来源的环境文件。
+
+安装过程保留配置和状态目录，不构建或重载驱动。
+服务改为从 `/opt/pidesk-dashboard/src` 执行 Python 包。
 
 也可将源码包复制到 Pi，解压后执行 `sudo bash ops/scripts/install.sh`。
 安装过程保留配置和状态目录，不构建或重载驱动。
@@ -73,4 +95,4 @@ sudo systemctl start pidesk-html.service
 
 `runtime_user` 指定 Chromium 和声音播放使用的非 root 系统用户（默认 `pi`）；新设备安装前应按实际用户修改配置。`audio_device` 是传给 ALSA `aplay -D` 的设备名，新配置默认 `default`，可按 `aplay -L` 结果修改。历史配置未设置该项时沿用 `plughw:CARD=Headphones,DEV=0`。
 
-新配置的 `html_color_gain_r`、`html_color_gain_g`、`html_color_gain_b` 均为 1.0；可在控制台调整，恢复默认会重置为中性值。历史配置未设置时仍采用原有校准回退值，已保存的数值不受影响。
+新配置的 `html_color_gain_r`、`html_color_gain_g`、`html_color_gain_b` 均为 1.0；可在控制台调整，恢复默认使用应用校准值 R=1.00、G=0.98、B=0.97。历史配置未设置时仍采用原有校准回退值，已保存的数值不受影响。

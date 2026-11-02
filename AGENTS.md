@@ -77,6 +77,7 @@ DSH 同步插件独立维护在 [dsh-mek-pidesk-sync](https://github.com/MakeEpo
 | [docs/deployment.md](docs/deployment.md) | 首次安装与部署 |
 | [docs/hardware.md](docs/hardware.md) | 硬件、驱动、维护 |
 | [docs/ui.md](docs/ui.md) | 界面说明 |
+| [docs/layout-editor.md](docs/layout-editor.md) | 固定画布、元素拖拽、草稿应用与布局协议 |
 | [docs/verification.md](docs/verification.md) | 验证流程 |
 | [dsh-mek-pidesk-sync](https://github.com/MakeEpoch/dsh-mek-pidesk-sync) | 独立 DSH 宿主插件：聚合与推送、Bark 手机通知、配置项 |
 

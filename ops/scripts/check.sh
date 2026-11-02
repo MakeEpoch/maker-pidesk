@@ -19,6 +19,7 @@ if command -v node >/dev/null; then
   if [ ${#js_files[@]} -gt 0 ]; then
     for path in "${js_files[@]}"; do node --check "$path"; done
   fi
+  node --test tests/*.test.cjs
 else
   printf '%s\n' 'Node unavailable; JavaScript syntax check skipped.'
 fi

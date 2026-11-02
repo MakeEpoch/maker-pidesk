@@ -3,7 +3,7 @@ PORT ?= 8765
 HOST ?=
 .PHONY: help check format preview package deploy install deps hardware-check
 help:
-	@printf '%s\n' 'make check                 本地检查与离线测试' 'make preview               本地网页预览（离线、无硬件）' 'make package               生成可部署源码包' 'make deploy HOST=pi@<ip>   SSH 部署应用' 'sudo make deps             树莓派安装应用依赖' 'sudo make install          树莓派本地安装应用' 'make hardware-check        在树莓派检查控制页（需现有 Chromium）'
+	@printf '%s\n' 'make check                 本地检查与离线测试' 'make preview               本地网页预览（离线、无硬件）' 'make package               生成可部署源码包' 'make deploy                使用本地 .env.deploy.local 部署' 'make deploy HOST=pi@<ip>   指定 SSH 部署目标' 'sudo make deps             树莓派安装应用依赖' 'sudo make install          树莓派本地安装应用' 'make hardware-check        在树莓派检查控制页（需现有 Chromium）'
 check:
 	@PYTHON='$(PYTHON)' bash ops/scripts/check.sh
 preview:
